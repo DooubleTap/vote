@@ -1,5 +1,3 @@
-local QBCore = exports['qb-core']:GetCoreObject()
-
 -- ═══════════════════════════════════════════════════════════
 -- SYSTÈME DE NOTIFICATIONS UNIVERSEL / UNIVERSAL NOTIFICATION SYSTEM
 -- ═══════════════════════════════════════════════════════════
@@ -20,7 +18,7 @@ if IsDuplicityVersion() then
             
         elseif Config.NotificationSystem == 'ox_lib' then
             TriggerClientEvent('ox_lib:notify', source, {
-                title = 'Vote Top-Serveurs',
+                title = 'Vote System',
                 description = message,
                 type = type,
                 duration = duration
@@ -30,7 +28,7 @@ if IsDuplicityVersion() then
             TriggerClientEvent('esx:showNotification', source, message)
             
         elseif Config.NotificationSystem == 'okok' then
-            TriggerClientEvent('okokNotify:Alert', source, 'Vote Top-Serveurs', message, duration, type)
+            TriggerClientEvent('okokNotify:Alert', source, 'Vote System', message, duration, type)
             
         elseif Config.NotificationSystem == 'mythic' then
             local mythicType = type == 'success' and 'success' or 
@@ -67,7 +65,7 @@ else
             
         elseif Config.NotificationSystem == 'ox_lib' then
             exports.ox_lib:notify({
-                title = 'Vote Top-Serveurs',
+                title = 'Vote System',
                 description = message,
                 type = type,
                 duration = duration
@@ -77,7 +75,7 @@ else
             ESX.ShowNotification(message)
             
         elseif Config.NotificationSystem == 'okok' then
-            exports['okokNotify']:Alert('Vote Top-Serveurs', message, duration, type)
+            exports['okokNotify']:Alert('Vote System', message, duration, type)
             
         elseif Config.NotificationSystem == 'mythic' then
             local mythicType = type == 'success' and 'success' or 

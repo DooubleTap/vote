@@ -130,8 +130,10 @@ function EnvoyerDiscord(titre, msg, couleur)
             ["title"] = titre,
             ["description"] = msg,
             ["footer"] = {
-                ["text"] = "RPQC - Système de votes",
+                ["text"] = "🗳️ Votez pour RPQC",
+                ["icon_url"] = "https://i.imgur.com/AfFp7pu.png"
             },
+            ["url"] = Config.VoteURL,
             ["timestamp"] = os.date("!%Y-%m-%dT%H:%M:%SZ")
         }
     }
@@ -143,7 +145,7 @@ function EnvoyerDiscord(titre, msg, couleur)
             DebugPrint("Webhook Discord envoyé avec succès")
         end
     end, 'POST',
-        json.encode({username = "Vote Top-Serveurs", embeds = embed}),
+        json.encode({username = "Vote System", embeds = embed}),
         {['Content-Type'] = 'application/json'})
 end
 
@@ -182,7 +184,7 @@ local function DonnerRecompense(playerId, citizenid, playerName, playerIP, sourc
         
         -- Donner la récompense selon le framework
         if Config.Framework == 'qb-core' or Config.Framework == 'qbx_core' then
-            player.Functions.AddMoney(Config.RewardType, Config.RewardAmount, 'Vote de citoyen')
+            player.Functions.AddMoney(Config.RewardType, Config.RewardAmount, 'Vote Reward')
         elseif Config.Framework == 'esx' then
             if Config.RewardType == 'cash' then
                 player.addMoney(Config.RewardAmount)
@@ -270,13 +272,14 @@ local function RecupererVotesRecents()
                     LogPrint("Votes récupérés: " .. #data.votes)
                     DebugPrint("Données: " .. json.encode(data))
                     
+                    -- TRAITER CHAQUE VOTE INDIVIDUELLEMENT
                     for i, vote in ipairs(data.votes) do
                         local voteIP = vote.ip
                         DebugPrint("Vote #" .. i .. " - IP: " .. voteIP .. " - Pseudo: " .. (vote.pseudo or "N/A"))
                         
+                        -- Vérifier si cette IP a déjà été traitée RÉCEMMENT (cache court de 5 min)
                         if not ipVerifiees[voteIP] then
                             DebugPrint("IP " .. voteIP .. " non vérifiée, scan des joueurs...")
-                            ipVerifiees[voteIP] = os.time()
                             
                             local joueurTrouve = false
                             for _, playerId in ipairs(GetPlayers()) do
@@ -304,6 +307,9 @@ local function RecupererVotesRecents()
                                             citizenid = player.identifier
                                         end
                                         
+                                        -- MARQUER L'IP COMME VÉRIFIÉE AVANT DE DONNER LA RÉCOMPENSE
+                                        ipVerifiees[voteIP] = os.time()
+                                        
                                         DonnerRecompense(playerId, citizenid, playerName, playerIP, 'auto')
                                         joueurTrouve = true
                                         break
@@ -313,9 +319,11 @@ local function RecupererVotesRecents()
                             
                             if not joueurTrouve then
                                 DebugPrint("Aucun joueur connecté avec IP " .. voteIP)
+                                -- Marquer quand même pour éviter de re-scanner cette IP
+                                ipVerifiees[voteIP] = os.time()
                             end
                         else
-                            DebugPrint("IP " .. voteIP .. " déjà en cache mémoire")
+                            DebugPrint("IP " .. voteIP .. " déjà en cache mémoire (vérifiée il y a " .. (os.time() - ipVerifiees[voteIP]) .. "s)")
                         end
                     end
                 else
@@ -377,32 +385,35 @@ if Config.Framework == 'qb-core' or Config.Framework == 'qbx_core' then
         LogPrint("Connexion: " .. playerName .. " (ID: " .. playerId .. ")")
         DebugPrint("IP extraite: " .. playerIP)
         
-        if not ipVerifiees[playerIP] then
-            DebugPrint("Vérification vote à la connexion...")
-            
-            local apiUrl = "https://api.top-games.net/v1/votes/check-ip?server_token=" .. Config.VoteToken .. "&ip=" .. playerIP
-            
-            PerformHttpRequest(
-                apiUrl,
-                function(statusCode, response, headers)
-                    if statusCode == 200 then
-                        local success, data = pcall(json.decode, response)
-                        if success and data and data.success and data.code == 200 then
-                            LogPrint("Vote trouvé pour " .. playerName .. " à la connexion!")
-                            ipVerifiees[playerIP] = os.time()
-                            
-                            local player = QBCore.Functions.GetPlayer(tonumber(playerId))
-                            if player then
-                                DonnerRecompense(playerId, citizenid, playerName, playerIP, 'connection')
-                            end
+        -- NE PAS vérifier le cache pour la connexion - toujours vérifier
+        DebugPrint("Vérification vote à la connexion pour " .. playerName)
+        
+        local apiUrl = "https://api.top-games.net/v1/votes/check-ip?server_token=" .. Config.VoteToken .. "&ip=" .. playerIP
+        
+        PerformHttpRequest(
+            apiUrl,
+            function(statusCode, response, headers)
+                DebugPrint("Connexion - API Response Code: " .. tostring(statusCode))
+                
+                if statusCode == 200 then
+                    local success, data = pcall(json.decode, response)
+                    if success and data and data.success and data.code == 200 then
+                        LogPrint("Vote trouvé pour " .. playerName .. " à la connexion!")
+                        ipVerifiees[playerIP] = os.time()
+                        
+                        local player = QBCore.Functions.GetPlayer(tonumber(playerId))
+                        if player then
+                            DonnerRecompense(playerId, citizenid, playerName, playerIP, 'connection')
                         end
+                    else
+                        DebugPrint("Aucun vote en attente pour " .. playerName)
                     end
-                end,
-                'GET',
-                '',
-                {['Content-Type'] = 'application/json'}
-            )
-        end
+                end
+            end,
+            'GET',
+            '',
+            {['Content-Type'] = 'application/json'}
+        )
     end)
 elseif Config.Framework == 'esx' then
     AddEventHandler('esx:playerLoaded', function(playerId, xPlayer)
@@ -417,32 +428,34 @@ elseif Config.Framework == 'esx' then
         LogPrint("Connexion: " .. playerName .. " (ID: " .. playerId .. ")")
         DebugPrint("IP extraite: " .. playerIP)
         
-        if not ipVerifiees[playerIP] then
-            DebugPrint("Vérification vote à la connexion...")
-            
-            local apiUrl = "https://api.top-games.net/v1/votes/check-ip?server_token=" .. Config.VoteToken .. "&ip=" .. playerIP
-            
-            PerformHttpRequest(
-                apiUrl,
-                function(statusCode, response, headers)
-                    if statusCode == 200 then
-                        local success, data = pcall(json.decode, response)
-                        if success and data and data.success and data.code == 200 then
-                            LogPrint("Vote trouvé pour " .. playerName .. " à la connexion!")
-                            ipVerifiees[playerIP] = os.time()
-                            
-                            local player = ESX.GetPlayerFromId(tonumber(playerId))
-                            if player then
-                                DonnerRecompense(playerId, citizenid, playerName, playerIP, 'connection')
-                            end
+        DebugPrint("Vérification vote à la connexion pour " .. playerName)
+        
+        local apiUrl = "https://api.top-games.net/v1/votes/check-ip?server_token=" .. Config.VoteToken .. "&ip=" .. playerIP
+        
+        PerformHttpRequest(
+            apiUrl,
+            function(statusCode, response, headers)
+                DebugPrint("Connexion - API Response Code: " .. tostring(statusCode))
+                
+                if statusCode == 200 then
+                    local success, data = pcall(json.decode, response)
+                    if success and data and data.success and data.code == 200 then
+                        LogPrint("Vote trouvé pour " .. playerName .. " à la connexion!")
+                        ipVerifiees[playerIP] = os.time()
+                        
+                        local player = ESX.GetPlayerFromId(tonumber(playerId))
+                        if player then
+                            DonnerRecompense(playerId, citizenid, playerName, playerIP, 'connection')
                         end
+                    else
+                        DebugPrint("Aucun vote en attente pour " .. playerName)
                     end
-                end,
-                'GET',
-                '',
-                {['Content-Type'] = 'application/json'}
-            )
-        end
+                end
+            end,
+            'GET',
+            '',
+            {['Content-Type'] = 'application/json'}
+        )
     end)
 end
 
@@ -547,7 +560,7 @@ if Config.Framework == 'qb-core' or Config.Framework == 'qbx_core' then
         local playerEndpoint = GetPlayerEndpoint(playerId)
         local playerIP = playerEndpoint:match("([^:]+)")
         
-        player.Functions.AddMoney(Config.RewardType, Config.RewardAmount, 'Vote de citoyen (Forced)')
+        player.Functions.AddMoney(Config.RewardType, Config.RewardAmount, 'Vote Reward (Forced)')
         
         MySQL.Async.insert('INSERT INTO vote_rewards (citizenid, player_name, ip_address, reward_amount, reward_type, vote_source) VALUES (@citizenid, @player_name, @ip_address, @reward_amount, @reward_type, @vote_source)', {
             ['@citizenid'] = citizenid,
