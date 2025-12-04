@@ -1,20 +1,37 @@
 Config = {}
 
+-- ═══════════════════════════════════════════════════════════
 -- CONFIGURATION GÉNÉRALE / GENERAL CONFIGURATION
+-- ═══════════════════════════════════════════════════════════
+
 Config.Locale = 'fr' -- Langue / Language: 'fr', 'en'
 
+-- ═══════════════════════════════════════════════════════════
 -- FRAMEWORK
+-- ═══════════════════════════════════════════════════════════
+
 Config.Framework = 'qb-core' -- Framework: 'qb-core', 'esx', 'qbx_core'
 
+-- ═══════════════════════════════════════════════════════════
 -- SYSTÈME DE NOTIFICATIONS / NOTIFICATION SYSTEM
+-- ═══════════════════════════════════════════════════════════
+
 Config.NotificationSystem = 'qbcore' -- Options: 'qbcore', 'ox_lib', 'esx', 'okok', 'mythic', 'custom'
+
 -- Si vous utilisez un système custom, configurez la fonction dans notifications.lua
 -- If using custom system, configure the function in notifications.lua
 
+-- ═══════════════════════════════════════════════════════════
 -- TOP-SERVEURS API
-Config.VoteToken = "CHANGE_ME_NOW" -- Obtenir sur / Get from: https://top-serveurs.net/gta
+-- ═══════════════════════════════════════════════════════════
 
+Config.VoteToken = "CHANGE_ME" -- Obtenir sur / Get from: https://top-serveurs.net/gta
+Config.VoteURL = "https://top-serveurs.net/gta/vote/CHANGE_ME" -- Lien pour voter / Vote link
+
+-- ═══════════════════════════════════════════════════════════
 -- RÉCOMPENSES / REWARDS
+-- ═══════════════════════════════════════════════════════════
+
 Config.RewardAmount = 500                -- Montant de la récompense / Reward amount
 Config.RewardType = 'bank'               -- Type: 'cash' ou 'bank' / Type: 'cash' or 'bank'
 
@@ -22,16 +39,22 @@ Config.RewardType = 'bank'               -- Type: 'cash' ou 'bank' / Type: 'cash
 Config.MultipleRewards = false           -- Activer les récompenses multiples / Enable multiple rewards
 Config.Rewards = {
     {type = 'money', account = 'cash', amount = 500},
-    -- {type = 'item', name = 'water', amount = 1},
-    -- {type = 'item', name = 'sandwich', amount = 1},
+    -- {type = 'item', name = 'bigking', amount = 5},
+    -- {type = 'item', name = 'water', amount = 5},
 }
 
+-- ═══════════════════════════════════════════════════════════
 -- NOTIFICATIONS
+-- ═══════════════════════════════════════════════════════════
+
 Config.NotificationDuration = 8000       -- Durée en ms / Duration in ms
 
+-- ═══════════════════════════════════════════════════════════
 -- DISCORD WEBHOOK
+-- ═══════════════════════════════════════════════════════════
+
 Config.UseDiscordWebhook = true          -- Activer les webhooks Discord / Enable Discord webhooks
-Config.DiscordWebhook = "CHANGE_ME_WITH_YOUR_WEBHOOK_LINK"
+Config.DiscordWebhook = "CHANGE_ME"
 
 -- Couleurs Discord (format décimal) / Discord colors (decimal format)
 Config.DiscordColors = {
@@ -41,12 +64,18 @@ Config.DiscordColors = {
     admin = 3447003     -- Bleu / Blue
 }
 
+-- ═══════════════════════════════════════════════════════════
 -- PERFORMANCES
-Config.CheckInterval = 300000            -- Vérification toutes les 5 minutes / Check every 5 minutes (300000 = 5min)
-Config.CacheCleanupInterval = 600000     -- Nettoyage cache / Cache cleanup (600000 = 10min)
-Config.IPCacheTimeout = 900              -- Cache IP en secondes / IP cache in seconds (900 = 15min)
+-- ═══════════════════════════════════════════════════════════
 
+Config.CheckInterval = 30000             -- Vérification toutes les 30 secondes / Check every 30 seconds
+Config.CacheCleanupInterval = 600000     -- Nettoyage cache / Cache cleanup (600000 = 10min)
+Config.IPCacheTimeout = 300              -- Cache IP en secondes / IP cache in seconds (300 = 5min)
+
+-- ═══════════════════════════════════════════════════════════
 -- COMMANDES / COMMANDS
+-- ═══════════════════════════════════════════════════════════
+
 Config.Commands = {
     checkVote = 'checkvote',             -- Commande pour vérifier son vote / Command to check vote
     forceVote = 'forcervote',            -- Commande admin pour forcer / Admin command to force
@@ -54,23 +83,38 @@ Config.Commands = {
     voteHelp = 'votehelp',              -- Commande d'aide / Help command
 }
 
+-- ═══════════════════════════════════════════════════════════
 -- PERMISSIONS ADMIN
+-- ═══════════════════════════════════════════════════════════
+
 Config.AdminPermission = 'admin'         -- Permission requise pour commandes admin / Required permission for admin commands
 
+-- ═══════════════════════════════════════════════════════════
 -- FONCTIONNALITÉS CLIENT / CLIENT FEATURES
-Config.VoteReminder = false               -- Rappel automatique pour voter / Automatic vote reminder
+-- ═══════════════════════════════════════════════════════════
+
+Config.VoteReminder = true               -- Rappel automatique pour voter / Automatic vote reminder
 Config.VoteReminderInterval = 3600000    -- Intervalle de rappel en ms / Reminder interval in ms (3600000 = 1 heure / 1 hour)
 Config.PlaySoundOnReward = true          -- Jouer un son lors de la récompense / Play sound on reward
 Config.ShowChatMessage = true            -- Afficher message dans le chat / Show chat message
 
+-- ═══════════════════════════════════════════════════════════
 -- DATABASE
+-- ═══════════════════════════════════════════════════════════
+
 Config.DatabaseCleanup = true            -- Nettoyer les anciens votes / Cleanup old votes
 Config.DatabaseCleanupDays = 30          -- Garder l'historique X jours / Keep history for X days
 
+-- ═══════════════════════════════════════════════════════════
 -- DEBUG
+-- ═══════════════════════════════════════════════════════════
+
 Config.Debug = false                     -- Activer les logs détaillés / Enable detailed logs
 
+-- ═══════════════════════════════════════════════════════════
 -- TRADUCTIONS / TRANSLATIONS
+-- ═══════════════════════════════════════════════════════════
+
 Config.Locales = {
     ['fr'] = {
         -- Notifications joueur
@@ -82,7 +126,7 @@ Config.Locales = {
         ['vote_forced'] = 'Un admin t\'a donné $%s (vote forcé)',
         ['reward_given'] = 'Récompense donnée à %s',
         ['player_not_found'] = 'Joueur introuvable',
-        ['vote_info'] = 'Vote pour RPQC sur top-serveurs.net et reçois $%s!',
+        ['vote_info'] = 'Vote pour le serveur sur top-serveurs.net et reçois $%s!',
         ['vote_info_command'] = 'Utilise /%s après avoir voté pour réclamer ta récompense',
         ['vote_reminder'] = '💎 N\'oublie pas de voter pour le serveur sur top-serveurs.net!',
         ['vote_reminder_command'] = 'Utilise /%s pour plus d\'infos',
@@ -103,7 +147,7 @@ Config.Locales = {
         ['db_error'] = 'Erreur lors de l\'initialisation de la base de données',
         
         -- Discord
-        ['discord_footer'] = 'RPQC - Système de votes',
+        ['discord_footer'] = 'Système de votes',
         ['discord_vote_rewarded'] = '🎉 Vote récompensé!',
         ['discord_vote_connection'] = '🎉 Vote récompensé à la connexion',
         ['discord_vote_manual'] = '🎉 Vote récompensé (manuel)',
@@ -137,7 +181,7 @@ Config.Locales = {
         ['vote_forced'] = 'An admin gave you $%s (forced vote)',
         ['reward_given'] = 'Reward given to %s',
         ['player_not_found'] = 'Player not found',
-        ['vote_info'] = 'Vote for RPQC on top-serveurs.net and receive $%s!',
+        ['vote_info'] = 'Vote for the server on top-serveurs.net and receive $%s!',
         ['vote_info_command'] = 'Use /%s after voting to claim your reward',
         ['vote_reminder'] = '💎 Don\'t forget to vote for the server on top-serveurs.net!',
         ['vote_reminder_command'] = 'Use /%s for more info',
@@ -158,7 +202,7 @@ Config.Locales = {
         ['db_error'] = 'Error initializing database',
         
         -- Discord
-        ['discord_footer'] = 'RPQC - Vote System',
+        ['discord_footer'] = 'Vote System',
         ['discord_vote_rewarded'] = '🎉 Vote Rewarded!',
         ['discord_vote_connection'] = '🎉 Vote rewarded on connection',
         ['discord_vote_manual'] = '🎉 Vote rewarded (manual)',
